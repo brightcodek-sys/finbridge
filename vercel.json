@@ -2,9 +2,10 @@
   "buildCommand": "pnpm install && pnpm run typecheck:libs && pnpm --filter @workspace/finbridge run build",
   "outputDirectory": "artifacts/finbridge/dist/public",
   "framework": null,
-  "env": {
-    "BASE_PATH": "/",
-    "PORT": "3000"
+  "build": {
+    "env": {
+      "BASE_PATH": "/"
+    }
   },
   "rewrites": [
     { "source": "/(.*)", "destination": "/index.html" }
