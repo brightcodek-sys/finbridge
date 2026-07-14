@@ -3,13 +3,28 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: FinBridge API - Open Banking + Financial Inclusion platform
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: users
+    description: User profile and KYC management
+  - name: accounts
+    description: Bank account aggregation
+  - name: transactions
+    description: Transaction history and analytics
+  - name: savings
+    description: Personal savings goals
+  - name: community
+    description: Ajo/Esusu community savings groups
+  - name: insights
+    description: Financial insights and recommendations
+  - name: dashboard
+    description: Dashboard summary data
+
 paths:
   /healthz:
     get:
@@ -24,6 +39,437 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  # ── USER ──────────────────────────────────────────────────────────────────
+  /users/me:
+    get:
+      operationId: getMe
+      tags: [users]
+      summary: Get current user profile
+      responses:
+        "200":
+          description: User profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+    patch:
+      operationId: updateMe
+      tags: [users]
+      summary: Update user profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserUpdate"
+      responses:
+        "200":
+          description: Updated user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+
+  /users/me/kyc:
+    post:
+      operationId: submitKyc
+      tags: [users]
+      summary: Submit KYC upgrade request
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/KycInput"
+      responses:
+        "200":
+          description: KYC result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+
+  # ── ACCOUNTS ──────────────────────────────────────────────────────────────
+  /accounts:
+    get:
+      operationId: listAccounts
+      tags: [accounts]
+      summary: List all connected bank accounts
+      responses:
+        "200":
+          description: List of bank accounts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/BankAccount"
+    post:
+      operationId: connectAccount
+      tags: [accounts]
+      summary: Connect a new bank account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BankAccountInput"
+      responses:
+        "201":
+          description: Account connected
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BankAccount"
+
+  /accounts/{id}:
+    get:
+      operationId: getAccount
+      tags: [accounts]
+      summary: Get a single bank account
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Bank account
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BankAccount"
+    delete:
+      operationId: disconnectAccount
+      tags: [accounts]
+      summary: Disconnect a bank account
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Disconnected
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessMessage"
+
+  # ── TRANSACTIONS ──────────────────────────────────────────────────────────
+  /transactions:
+    get:
+      operationId: listTransactions
+      tags: [transactions]
+      summary: List all transactions (paginated)
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: accountId
+          in: query
+          schema:
+            type: ["integer", "null"]
+        - name: category
+          in: query
+          schema:
+            type: ["string", "null"]
+        - name: type
+          in: query
+          schema:
+            type: ["string", "null"]
+            enum: [credit, debit, null]
+      responses:
+        "200":
+          description: Paginated transactions
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TransactionList"
+    post:
+      operationId: createTransaction
+      tags: [transactions]
+      summary: Record a manual transaction
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TransactionInput"
+      responses:
+        "201":
+          description: Created transaction
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Transaction"
+
+  /transactions/analytics:
+    get:
+      operationId: getTransactionAnalytics
+      tags: [transactions]
+      summary: Spending breakdown by category for last 30 days
+      responses:
+        "200":
+          description: Spending analytics
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TransactionAnalytics"
+
+  # ── SAVINGS GOALS ─────────────────────────────────────────────────────────
+  /savings:
+    get:
+      operationId: listSavingsGoals
+      tags: [savings]
+      summary: List all savings goals
+      responses:
+        "200":
+          description: Savings goals
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SavingsGoal"
+    post:
+      operationId: createSavingsGoal
+      tags: [savings]
+      summary: Create a new savings goal
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SavingsGoalInput"
+      responses:
+        "201":
+          description: Created savings goal
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SavingsGoal"
+
+  /savings/{id}:
+    get:
+      operationId: getSavingsGoal
+      tags: [savings]
+      summary: Get a single savings goal
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Savings goal
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SavingsGoal"
+    patch:
+      operationId: updateSavingsGoal
+      tags: [savings]
+      summary: Update a savings goal
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SavingsGoalUpdate"
+      responses:
+        "200":
+          description: Updated savings goal
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SavingsGoal"
+    delete:
+      operationId: deleteSavingsGoal
+      tags: [savings]
+      summary: Delete a savings goal
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessMessage"
+
+  /savings/{id}/contribute:
+    post:
+      operationId: contributeToGoal
+      tags: [savings]
+      summary: Add money to a savings goal
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ContributionInput"
+      responses:
+        "200":
+          description: Updated savings goal
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SavingsGoal"
+
+  # ── COMMUNITY GROUPS (AJO/ESUSU) ──────────────────────────────────────────
+  /community:
+    get:
+      operationId: listCommunityGroups
+      tags: [community]
+      summary: List all community savings groups
+      responses:
+        "200":
+          description: Community groups
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CommunityGroup"
+    post:
+      operationId: createCommunityGroup
+      tags: [community]
+      summary: Create a new Ajo/Esusu group
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CommunityGroupInput"
+      responses:
+        "201":
+          description: Created community group
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CommunityGroup"
+
+  /community/{id}:
+    get:
+      operationId: getCommunityGroup
+      tags: [community]
+      summary: Get a community group with members
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Community group with members
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CommunityGroupDetail"
+
+  /community/{id}/join:
+    post:
+      operationId: joinCommunityGroup
+      tags: [community]
+      summary: Join a community savings group
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Joined group
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CommunityGroup"
+
+  /community/{id}/contribute:
+    post:
+      operationId: contributeToGroup
+      tags: [community]
+      summary: Make contribution to a community group
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ContributionInput"
+      responses:
+        "200":
+          description: Updated group
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CommunityGroup"
+
+  # ── INSIGHTS ──────────────────────────────────────────────────────────────
+  /insights:
+    get:
+      operationId: listInsights
+      tags: [insights]
+      summary: List financial insights for current user
+      responses:
+        "200":
+          description: Financial insights
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/FinancialInsight"
+
+  # ── DASHBOARD ─────────────────────────────────────────────────────────────
+  /dashboard/summary:
+    get:
+      operationId: getDashboardSummary
+      tags: [dashboard]
+      summary: Get high-level dashboard stats
+      responses:
+        "200":
+          description: Dashboard summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardSummary"
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +480,482 @@ components:
       required:
         - status
 
+    SuccessMessage:
+      type: object
+      properties:
+        message:
+          type: string
+      required:
+        - message
+
+    # ── USER ──────────────────────────────────────────────────────────────
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+        phone:
+          type: ["string", "null"]
+        bvn:
+          type: ["string", "null"]
+        kycTier:
+          type: string
+          enum: [basic, intermediate, full]
+        financialHealthScore:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - name
+        - email
+        - kycTier
+        - financialHealthScore
+        - createdAt
+
+    UserUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        phone:
+          type: string
+
+    KycInput:
+      type: object
+      properties:
+        tier:
+          type: string
+          enum: [intermediate, full]
+        bvn:
+          type: ["string", "null"]
+        nin:
+          type: ["string", "null"]
+        address:
+          type: ["string", "null"]
+      required:
+        - tier
+
+    # ── ACCOUNTS ──────────────────────────────────────────────────────────
+    BankAccount:
+      type: object
+      properties:
+        id:
+          type: integer
+        bankName:
+          type: string
+        accountNumber:
+          type: string
+        accountType:
+          type: string
+          enum: [savings, current, wallet]
+        balance:
+          type: number
+        currency:
+          type: string
+        isActive:
+          type: boolean
+        connectedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - bankName
+        - accountNumber
+        - accountType
+        - balance
+        - currency
+        - isActive
+        - connectedAt
+
+    BankAccountInput:
+      type: object
+      properties:
+        bankName:
+          type: string
+        accountNumber:
+          type: string
+        accountType:
+          type: string
+          enum: [savings, current, wallet]
+      required:
+        - bankName
+        - accountNumber
+        - accountType
+
+    # ── TRANSACTIONS ──────────────────────────────────────────────────────
+    Transaction:
+      type: object
+      properties:
+        id:
+          type: integer
+        accountId:
+          type: integer
+        amount:
+          type: number
+        type:
+          type: string
+          enum: [credit, debit]
+        category:
+          type: string
+        description:
+          type: string
+        date:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum: [completed, pending, failed]
+        bankName:
+          type: ["string", "null"]
+      required:
+        - id
+        - accountId
+        - amount
+        - type
+        - category
+        - description
+        - date
+        - status
+
+    TransactionInput:
+      type: object
+      properties:
+        accountId:
+          type: integer
+        amount:
+          type: number
+        type:
+          type: string
+          enum: [credit, debit]
+        category:
+          type: string
+        description:
+          type: string
+        date:
+          type: string
+          format: date-time
+      required:
+        - accountId
+        - amount
+        - type
+        - category
+        - description
+
+    TransactionList:
+      type: object
+      properties:
+        transactions:
+          type: array
+          items:
+            $ref: "#/components/schemas/Transaction"
+        total:
+          type: integer
+        limit:
+          type: integer
+        offset:
+          type: integer
+      required:
+        - transactions
+        - total
+        - limit
+        - offset
+
+    CategorySpend:
+      type: object
+      properties:
+        category:
+          type: string
+        amount:
+          type: number
+        count:
+          type: integer
+        percentage:
+          type: number
+      required:
+        - category
+        - amount
+        - count
+        - percentage
+
+    TransactionAnalytics:
+      type: object
+      properties:
+        totalSpend:
+          type: number
+        totalIncome:
+          type: number
+        byCategory:
+          type: array
+          items:
+            $ref: "#/components/schemas/CategorySpend"
+        periodDays:
+          type: integer
+      required:
+        - totalSpend
+        - totalIncome
+        - byCategory
+        - periodDays
+
+    # ── SAVINGS ───────────────────────────────────────────────────────────
+    SavingsGoal:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        targetAmount:
+          type: number
+        currentAmount:
+          type: number
+        deadline:
+          type: ["string", "null"]
+          format: date
+        autoDeductAmount:
+          type: ["number", "null"]
+        autoDeductEnabled:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - name
+        - targetAmount
+        - currentAmount
+        - autoDeductEnabled
+        - createdAt
+
+    SavingsGoalInput:
+      type: object
+      properties:
+        name:
+          type: string
+        targetAmount:
+          type: number
+        deadline:
+          type: ["string", "null"]
+          format: date
+        autoDeductAmount:
+          type: ["number", "null"]
+        autoDeductEnabled:
+          type: boolean
+      required:
+        - name
+        - targetAmount
+
+    SavingsGoalUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        targetAmount:
+          type: number
+        deadline:
+          type: ["string", "null"]
+          format: date
+        autoDeductAmount:
+          type: ["number", "null"]
+        autoDeductEnabled:
+          type: boolean
+
+    ContributionInput:
+      type: object
+      properties:
+        amount:
+          type: number
+      required:
+        - amount
+
+    # ── COMMUNITY GROUPS ──────────────────────────────────────────────────
+    CommunityGroup:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+        contributionAmount:
+          type: number
+        cycleDays:
+          type: integer
+        totalPool:
+          type: number
+        memberCount:
+          type: integer
+        nextPayoutDate:
+          type: ["string", "null"]
+          format: date
+        isMember:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - name
+        - description
+        - contributionAmount
+        - cycleDays
+        - totalPool
+        - memberCount
+        - isMember
+        - createdAt
+
+    CommunityGroupInput:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        contributionAmount:
+          type: number
+        cycleDays:
+          type: integer
+      required:
+        - name
+        - description
+        - contributionAmount
+        - cycleDays
+
+    GroupMember:
+      type: object
+      properties:
+        id:
+          type: integer
+        userId:
+          type: integer
+        name:
+          type: string
+        rotationOrder:
+          type: integer
+        hasPaidCurrentCycle:
+          type: boolean
+        joinedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - userId
+        - name
+        - rotationOrder
+        - hasPaidCurrentCycle
+        - joinedAt
+
+    CommunityGroupDetail:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+        contributionAmount:
+          type: number
+        cycleDays:
+          type: integer
+        totalPool:
+          type: number
+        memberCount:
+          type: integer
+        nextPayoutDate:
+          type: ["string", "null"]
+          format: date
+        isMember:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        members:
+          type: array
+          items:
+            $ref: "#/components/schemas/GroupMember"
+      required:
+        - id
+        - name
+        - description
+        - contributionAmount
+        - cycleDays
+        - totalPool
+        - memberCount
+        - isMember
+        - createdAt
+        - members
+
+    # ── INSIGHTS ──────────────────────────────────────────────────────────
+    FinancialInsight:
+      type: object
+      properties:
+        id:
+          type: integer
+        type:
+          type: string
+          enum: [warning, tip, achievement, alert]
+        title:
+          type: string
+        description:
+          type: string
+        recommendation:
+          type: string
+        impact:
+          type: string
+          enum: [high, medium, low]
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - type
+        - title
+        - description
+        - recommendation
+        - impact
+        - createdAt
+
+    # ── DASHBOARD ─────────────────────────────────────────────────────────
+    DashboardSummary:
+      type: object
+      properties:
+        totalBalance:
+          type: number
+        monthlyIncome:
+          type: number
+        monthlyExpenses:
+          type: number
+        savingsRate:
+          type: number
+        financialHealthScore:
+          type: integer
+        totalSavings:
+          type: number
+        activeGroupsCount:
+          type: integer
+        accountsCount:
+          type: integer
+        recentTransactions:
+          type: array
+          items:
+            $ref: "#/components/schemas/Transaction"
+        insightCount:
+          type: integer
+      required:
+        - totalBalance
+        - monthlyIncome
+        - monthlyExpenses
+        - savingsRate
+        - financialHealthScore
+        - totalSavings
+        - activeGroupsCount
+        - accountsCount
+        - recentTransactions
+        - insightCount

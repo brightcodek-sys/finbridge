@@ -1,0 +1,27 @@
+kind = "web"
+previewPath = "/"
+title = "FinBridge"
+version = "1.0.0"
+id = "artifacts/finbridge"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 21624
+
+[services.development]
+run = "pnpm --filter @workspace/finbridge run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/finbridge", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/finbridge/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "21624"
+BASE_PATH = "/"
