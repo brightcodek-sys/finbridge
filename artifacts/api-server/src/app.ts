@@ -25,7 +25,13 @@ app.use(
     },
   }),
 );
-app.use(cors());
+// In production the frontend is on Vercel and the API is on Render, so we
+// need to allow cross-origin requests. CORS_ORIGIN env var lets you lock this
+// down to your exact Vercel URL once you know it; defaults to all origins.
+app.use(cors({
+  origin: process.env.CORS_ORIGIN ?? true,
+  credentials: true,
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
