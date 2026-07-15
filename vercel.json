@@ -1,12 +1,7 @@
 {
-  "buildCommand": "pnpm install && pnpm exec tsc --build && pnpm --filter @workspace/finbridge run build",
-  "outputDirectory": "artifacts/finbridge/dist",
+  "buildCommand": "bash vercel-build.sh",
+  "outputDirectory": "vercel-output",
   "framework": null,
-  "build": {
-    "env": {
-      "BASE_PATH": "/"
-    }
-  },
   "rewrites": [
     { "source": "/(.*)", "destination": "/index.html" }
   ]
