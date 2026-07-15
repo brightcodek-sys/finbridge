@@ -1,6 +1,6 @@
 {
-  "buildCommand": "echo 'Serving pre-built files'",
-  "outputDirectory": "dist",
+  "buildCommand": "cp -r dist public",
+  "outputDirectory": "public",
   "framework": null,
   "rewrites": [
     { "source": "/(.*)", "destination": "/index.html" }

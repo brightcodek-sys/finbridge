@@ -1,6 +1,6 @@
 {
-  "buildCommand": "echo 'Serving pre-built files'",
-  "outputDirectory": "artifacts/finbridge/dist",
+  "buildCommand": "cp -r artifacts/finbridge/dist artifacts/finbridge/public",
+  "outputDirectory": "artifacts/finbridge/public",
   "framework": null,
   "rewrites": [
     { "source": "/(.*)", "destination": "/index.html" }
