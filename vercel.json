@@ -1,5 +1,5 @@
 {
-  "buildCommand": "bash vercel-build.sh",
+  "buildCommand": "pnpm install --frozen-lockfile && BASE_PATH=/ pnpm --filter @workspace/finbridge run build && mkdir -p vercel-output && cp -r artifacts/finbridge/dist/. vercel-output/",
   "outputDirectory": "vercel-output",
   "framework": null,
   "rewrites": [
