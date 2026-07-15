@@ -1,4 +1,5 @@
 {
+  "buildCommand": "echo 'Serving pre-built files'",
   "outputDirectory": "artifacts/finbridge/dist",
   "framework": null,
   "rewrites": [
