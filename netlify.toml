@@ -1,0 +1,8 @@
+[build]
+  command = "pnpm install && BASE_PATH=/ pnpm --filter @workspace/finbridge run build"
+  publish = "artifacts/finbridge/dist"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
