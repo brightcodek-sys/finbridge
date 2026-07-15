@@ -1,5 +1,5 @@
 {
-  "buildCommand": "pnpm install && pnpm run typecheck:libs && pnpm --filter @workspace/finbridge run build",
+  "buildCommand": "pnpm install && pnpm exec tsc --build && pnpm --filter @workspace/finbridge run build",
   "outputDirectory": "artifacts/finbridge/dist/public",
   "framework": null,
   "build": {
