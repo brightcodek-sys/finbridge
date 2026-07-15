@@ -1,6 +1,5 @@
 {
-  "buildCommand": "pnpm install && BASE_PATH=/ pnpm --filter @workspace/finbridge run build && mkdir -p vercel-output && cp -r artifacts/finbridge/dist/. vercel-output/",
-  "outputDirectory": "vercel-output",
+  "outputDirectory": "artifacts/finbridge/dist",
   "framework": null,
   "rewrites": [
     { "source": "/(.*)", "destination": "/index.html" }

@@ -2,6 +2,9 @@
 
 # compiled output
 dist
+# but commit the finbridge build so Vercel can serve it without a build step
+!artifacts/finbridge/dist
+!artifacts/finbridge/dist/**
 tmp
 out-tsc
 *.tsbuildinfo
