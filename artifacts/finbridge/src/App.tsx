@@ -12,6 +12,7 @@ import Community from '@/pages/community';
 import Insights from '@/pages/insights';
 import KYC from '@/pages/kyc';
 import Login from '@/pages/login';
+import Signup from '@/pages/signup';
 import { useEffect, useState } from 'react';
 
 const queryClient = new QueryClient({
@@ -46,6 +47,7 @@ function Router() {
     return (
       <Switch>
         <Route path="/login" component={Login} />
+        <Route path="/signup" component={Signup} />
         <Route component={Login} />
       </Switch>
     );
