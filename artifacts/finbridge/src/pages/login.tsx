@@ -3,7 +3,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useLocation } from 'wouter';
-import { Mail, Lock, Eye, EyeOff, AlertCircle } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, AlertCircle, CheckCircle } from 'lucide-react';
+import { loginUser } from '@/lib/auth';
 
 export default function Login() {
   const [, setLocation] = useLocation();
@@ -12,43 +13,41 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setSuccess('');
     setIsLoading(true);
 
     try {
-      // TODO: Replace with actual authentication API call
       if (!email || !password) {
-        setError('Please fill in all fields');
+        setError('Please enter both email and password');
         setIsLoading(false);
         return;
       }
 
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-        setError('Please enter a valid email');
+        setError('Please enter a valid email address');
         setIsLoading(false);
         return;
       }
 
-      if (password.length < 6) {
-        setError('Password must be at least 6 characters');
+      const result = await loginUser(email, password);
+
+      if (!result.success) {
+        setError(result.error || 'Login failed');
         setIsLoading(false);
         return;
       }
 
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      // Store auth token (TODO: use proper auth storage)
-      localStorage.setItem('authToken', 'mock-token-' + Date.now());
-      localStorage.setItem('userEmail', email);
-
-      // Redirect to dashboard
-      setLocation('/');
+      setSuccess('Login successful! Redirecting...');
+      setTimeout(() => {
+        setLocation('/');
+      }, 500);
     } catch (err) {
-      setError('Login failed. Please try again.');
+      setError('An error occurred. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -63,8 +62,8 @@ export default function Login() {
               <span className="text-white font-bold text-lg">F</span>
             </div>
           </div>
-          <CardTitle className="text-2xl font-bold text-center">Welcome to FinBridge</CardTitle>
-          <CardDescription className="text-center">Sign in to your account to continue</CardDescription>
+          <CardTitle className="text-2xl font-bold text-center">FinBridge</CardTitle>
+          <CardDescription className="text-center">Smart Financial Bridge - Open Banking & Inclusion</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -72,6 +71,13 @@ export default function Login() {
               <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md text-sm flex gap-2">
                 <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
                 <span>{error}</span>
+              </div>
+            )}
+
+            {success && (
+              <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-md text-sm flex gap-2">
+                <CheckCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                <span>{success}</span>
               </div>
             )}
 
@@ -84,7 +90,7 @@ export default function Login() {
                 <Input
                   id="email"
                   type="email"
-                  placeholder="you@example.com"
+                  placeholder="user@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="pl-10"
@@ -123,20 +129,6 @@ export default function Login() {
               </div>
             </div>
 
-            <div className="flex items-center justify-between text-sm">
-              <label className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  className="rounded border-gray-300"
-                  disabled={isLoading}
-                />
-                <span className="text-gray-700">Remember me</span>
-              </label>
-              <a href="#" className="text-indigo-600 hover:text-indigo-700 font-medium">
-                Forgot password?
-              </a>
-            </div>
-
             <Button
               type="submit"
               className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700"
@@ -147,7 +139,7 @@ export default function Login() {
           </form>
 
           <div className="mt-6 pt-6 border-t">
-            <p className="text-center text-sm text-gray-600">
+            <p className="text-center text-sm text-gray-600 mb-4">
               Don't have an account?{' '}
               <a
                 onClick={() => setLocation('/signup')}
@@ -156,6 +148,12 @@ export default function Login() {
                 Sign up
               </a>
             </p>
+            
+            <div className="bg-blue-50 border border-blue-200 rounded-md p-3">
+              <p className="text-xs text-blue-700 font-medium mb-2">Demo Account:</p>
+              <p className="text-xs text-blue-600">Email: demo@finbridge.com</p>
+              <p className="text-xs text-blue-600">Password: Demo@1234</p>
+            </div>
           </div>
         </CardContent>
       </Card>

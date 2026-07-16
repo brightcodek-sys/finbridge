@@ -4,19 +4,20 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useLocation } from 'wouter';
 import { Mail, Lock, User, Eye, EyeOff, AlertCircle } from 'lucide-react';
+import { signupUser } from '@/lib/auth';
 
 export default function Signup() {
   const [, setLocation] = useLocation();
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
-  const [agreed, setAgreed] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,7 +25,6 @@ export default function Signup() {
     setIsLoading(true);
 
     try {
-      // Validation
       if (!firstName.trim() || !lastName.trim()) {
         setError('Please enter your full name');
         setIsLoading(false);
@@ -33,6 +33,12 @@ export default function Signup() {
 
       if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
         setError('Please enter a valid email address');
+        setIsLoading(false);
+        return;
+      }
+
+      if (!phone || phone.length < 10) {
+        setError('Please enter a valid phone number');
         setIsLoading(false);
         return;
       }
@@ -49,26 +55,24 @@ export default function Signup() {
         return;
       }
 
-      if (!agreed) {
-        setError('Please agree to the terms and conditions');
+      const result = await signupUser({
+        firstName,
+        lastName,
+        email,
+        phone,
+        password,
+      });
+
+      if (!result.success) {
+        setError(result.error || 'Signup failed');
         setIsLoading(false);
         return;
       }
 
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
-
-      // Store user data and auth token
-      localStorage.setItem('authToken', 'mock-token-' + Date.now());
-      localStorage.setItem('userEmail', email);
-      localStorage.setItem('userName', `${firstName} ${lastName}`);
-      localStorage.setItem('userFirstName', firstName);
-      localStorage.setItem('userLastName', lastName);
-
-      // Redirect to dashboard
-      setLocation('/');
+      // Redirect to login
+      setLocation('/login');
     } catch (err) {
-      setError('Signup failed. Please try again.');
+      setError('An error occurred. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -84,7 +88,7 @@ export default function Signup() {
             </div>
           </div>
           <CardTitle className="text-2xl font-bold text-center">Create Account</CardTitle>
-          <CardDescription className="text-center">Join FinBridge to manage your finances</CardDescription>
+          <CardDescription className="text-center">Join FinBridge to access financial services</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -149,6 +153,19 @@ export default function Signup() {
             </div>
 
             <div className="space-y-2">
+              <label htmlFor="phone" className="text-sm font-medium text-gray-700">
+                Phone Number
+              </label>
+              <Input
+                id="phone"
+                placeholder="+234 801 234 5678"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                disabled={isLoading}
+              />
+            </div>
+
+            <div className="space-y-2">
               <label htmlFor="password" className="text-sm font-medium text-gray-700">
                 Password
               </label>
@@ -169,11 +186,7 @@ export default function Signup() {
                   className="absolute right-3 top-3 text-gray-400 hover:text-gray-600"
                   disabled={isLoading}
                 >
-                  {showPassword ? (
-                    <EyeOff className="w-4 h-4" />
-                  ) : (
-                    <Eye className="w-4 h-4" />
-                  )}
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
               <p className="text-xs text-gray-500">At least 8 characters</p>
@@ -200,34 +213,9 @@ export default function Signup() {
                   className="absolute right-3 top-3 text-gray-400 hover:text-gray-600"
                   disabled={isLoading}
                 >
-                  {showConfirmPassword ? (
-                    <EyeOff className="w-4 h-4" />
-                  ) : (
-                    <Eye className="w-4 h-4" />
-                  )}
+                  {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
-            </div>
-
-            <div className="flex items-start gap-2">
-              <input
-                type="checkbox"
-                id="terms"
-                checked={agreed}
-                onChange={(e) => setAgreed(e.target.checked)}
-                className="mt-1"
-                disabled={isLoading}
-              />
-              <label htmlFor="terms" className="text-sm text-gray-600">
-                I agree to the{' '}
-                <a href="#" className="text-indigo-600 hover:text-indigo-700 font-medium">
-                  Terms of Service
-                </a>{' '}
-                and{' '}
-                <a href="#" className="text-indigo-600 hover:text-indigo-700 font-medium">
-                  Privacy Policy
-                </a>
-              </label>
             </div>
 
             <Button
