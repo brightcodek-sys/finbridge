@@ -11,6 +11,8 @@ import Savings from '@/pages/savings';
 import Community from '@/pages/community';
 import Insights from '@/pages/insights';
 import KYC from '@/pages/kyc';
+import Login from '@/pages/login';
+import { useEffect, useState } from 'react';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -22,6 +24,33 @@ const queryClient = new QueryClient({
 });
 
 function Router() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    // Check if user is authenticated
+    const authToken = localStorage.getItem('authToken');
+    setIsAuthenticated(!!authToken);
+    setIsLoading(false);
+  }, []);
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <Switch>
+        <Route path="/login" component={Login} />
+        <Route component={Login} />
+      </Switch>
+    );
+  }
+
   return (
     <AppShell>
       <Switch>
