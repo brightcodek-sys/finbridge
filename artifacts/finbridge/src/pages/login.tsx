@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useLocation } from 'wouter';
-import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, AlertCircle } from 'lucide-react';
 
 export default function Login() {
   const [, setLocation] = useLocation();
@@ -22,16 +22,19 @@ export default function Login() {
       // TODO: Replace with actual authentication API call
       if (!email || !password) {
         setError('Please fill in all fields');
+        setIsLoading(false);
         return;
       }
 
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
         setError('Please enter a valid email');
+        setIsLoading(false);
         return;
       }
 
       if (password.length < 6) {
         setError('Password must be at least 6 characters');
+        setIsLoading(false);
         return;
       }
 
@@ -39,7 +42,7 @@ export default function Login() {
       await new Promise(resolve => setTimeout(resolve, 1000));
 
       // Store auth token (TODO: use proper auth storage)
-      localStorage.setItem('authToken', 'mock-token');
+      localStorage.setItem('authToken', 'mock-token-' + Date.now());
       localStorage.setItem('userEmail', email);
 
       // Redirect to dashboard
@@ -66,8 +69,9 @@ export default function Login() {
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-2 rounded-md text-sm">
-                {error}
+              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md text-sm flex gap-2">
+                <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                <span>{error}</span>
               </div>
             )}
 
@@ -145,7 +149,10 @@ export default function Login() {
           <div className="mt-6 pt-6 border-t">
             <p className="text-center text-sm text-gray-600">
               Don't have an account?{' '}
-              <a href="#" className="text-indigo-600 hover:text-indigo-700 font-medium">
+              <a
+                onClick={() => setLocation('/signup')}
+                className="text-indigo-600 hover:text-indigo-700 font-medium cursor-pointer"
+              >
                 Sign up
               </a>
             </p>
